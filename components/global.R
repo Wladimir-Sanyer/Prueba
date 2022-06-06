@@ -1,4 +1,5 @@
 
 box::use(
-  ./components/principal
+  ./components/principal,
+  ./components/datasql
 )
