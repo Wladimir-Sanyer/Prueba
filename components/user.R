@@ -45,15 +45,21 @@ userUI<-function(id,label='user'){
                            top=33,
                            left=25),
     utils$question_buttom(id=ns('eq'),
-                          msg = 'Por favor registrece e ingrese un ID valido, ID pre-cargado 1234')
-  ,column(6,
+                          msg = 'Por favor registrece e ingrese un ID valido')
+  ,column(4,
   actionButton(
     ns('search'),
     label = 'Buscar',
     icon=icon('check'))
   )
+  ,column(4,
+          actionButton(
+            ns('close'),
+            label = 'Reiniciar Sesión',
+            icon=icon('sync'))
   )
-  )
+ )
+)
 }
 
 #' @description Server Modulo User
@@ -149,7 +155,10 @@ observeEvent(input$client,{
       HTML(paste0("<b><i style=color:black;>Bienvenid@ ", y$user$user,"  </b>"))
     })
     
-    
+    #' @description Reiniciar Sesión
+    observeEvent(input$close,{
+      session$reload()
+    }) 
       
   
 return(input)
