@@ -8,8 +8,8 @@ insert_table<-function(name,dt){
 }
 
 # Data Usuario
-user=c('Wladimir','Ándres')
-id=c('1234','0932155422') #Cedula
+user=c('Wladimir','Junior')
+id=c('1234','3456') #Cedula
 row_id=c(1:length(user))
 df_0=data.frame(user,id,row_id)
 insert_table('tbl_user',df_0)
@@ -28,11 +28,11 @@ df=data.frame(id,name,second_name,age,adress,email,user_id,row_id)
 insert_table('tbl_personal',df)
 
 # Data Puesto
-name=c('Administrador','Gerente','Asistente','Transportista','Jefe','Operador','Estadistico','Informatico','Ingeniero','Fisico','Doctor')
+job=c('Administrador','Gerente','Asistente','Transportista','Jefe','Operador','Estadistico','Informatico','Ingeniero','Fisico','Doctor')
 description=c(rep('si '))
 user_id=c(1,1,1,1,1,1,1,1,1,1,1)
-row_id=c(1:length(name))
-df1=data.frame(name,description,user_id,row_id)
+row_id=c(1:length(job))
+df1=data.frame(job,description,user_id,row_id)
 insert_table('tbl_job',df1)
 
 
@@ -43,11 +43,11 @@ df2=data.frame(adress,id_adress)
 insert_table('tbl_adress',df2)
 
 # Relacion entre tablas (uno-muchos)
-id_personal=c(1,2,3,4,5,6)
-id_type=c(1,1,1,1,1,2)
-id_union=c(2,3,4,5,2,1)
-id_relation=c(1:length(id_personal))
-df3=data.frame(id_personal,id_type,id_union,id_relation)
+tbl_personal=c(1,2,3,4,5,6)
+tbl_user=c(1,1,1,1,1,1)
+tbl_job=c(2,3,4,5,2,1)
+row_id=c(1:length(tbl_personal))
+df3=data.frame(tbl_personal,tbl_user,tbl_job,row_id)
 insert_table('tbl_relation',df3)
 
 
@@ -88,3 +88,13 @@ user_id=1
 row_id=1
 df5=data.frame(logs,timestamp,user_id,row_id)
 insert_table('tbl_logs',df5)
+
+
+dbGetQuery(con,'Select * from tbl_relation relation
+           left join tbl_personal personal
+           on relation.tbl_personal = personal.row_id
+           left join tbl_job job
+           on relation.tbl_job = job.row_id
+           where personal.name is not null 
+           and tbl_user= 1')
+insert_table('iris',iris)

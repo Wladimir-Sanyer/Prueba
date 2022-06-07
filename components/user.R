@@ -1,8 +1,14 @@
 box::use(
-  shiny[...], ./forms, shinyjs[reset,toggleState],gargoyle[init,trigger,watch,on],
-  ./utils,DBI[dbGetQuery],./datasql,shinyalert[shinyalert]
+  shiny[...],
+  ./forms,
+  shinyjs[reset,toggleState],
+  gargoyle[init,trigger,watch,on],
+  ./utils,
+  DBI[dbGetQuery],
+  ./datasql,shinyalert[shinyalert]
   
 )
+#jsResetCode <- "shinyjs.reset = function() {history.go(0)}" 
 
 #' @export
 #' Se utilizara este modulo que reemplaza el shinyproxyname para saber que usuario esta
@@ -10,9 +16,15 @@ box::use(
 userUI<-function(id,label='user'){
   ns<-NS(id)
   tagList(
+    tags$head(
+              tags$link(rel = "stylesheet", 
+                        type = "text/css",
+                        href = "styles.css")
+              ),
     fluidRow(
     htmlOutput(ns('name_user'))
-    ),br(),
+    ),
+    br(), 
     fluidRow(
       utils$action_button(
         ns('client'),
@@ -26,7 +38,12 @@ userUI<-function(id,label='user'){
                 label = NULL,
                 placeholder = 'Ingrese su id para recuperar cambios',
                 value = '')
-    )
+    ),
+    utils$actt_bottom_prev(id=ns('eq'),
+                           top=33,
+                           left=30),
+    utils$question_buttom(id=ns('eq'),
+                          msg = 'Por favor registrece e ingrese un ID valido, ID pre-cargado 1234')
   ,column(6,
   actionButton(
     ns('search'),
@@ -50,8 +67,10 @@ userServ<-function(input,output,session){
   ##Reactive Form Nuevo Usuario#####
   # Entrar al agregar form para Nuevo Usuario #
   observeEvent(input$client,{
+
     forms$form_user(session,"Cree su usuario",ns("submit_button"), "Guardar")
     trigger('form')
+    
   })
   
   on("form", {
@@ -62,8 +81,8 @@ userServ<-function(input,output,session){
   
   
   observeEvent(input$submit_button, priority = 20,{
-    exist=dbGetQuery(datasql$con,paste0("SELECT  CASE WHEN EXISTS (Select ID FROM tbl_user where TRIM(ID) =
-                               TRIM('",input$ID,"')) THEN 1 ELSE 0 END"))
+    exist=dbGetQuery(datasql$con,paste0("SELECT  CASE WHEN EXISTS (Select id FROM tbl_user where TRIM(id) =
+                               TRIM('",input$id,"')) THEN 1 ELSE 0 END"))
     
     
     if(input$id=='' | exist==1){
@@ -82,11 +101,35 @@ userServ<-function(input,output,session){
                                           ,input$name)
     )
     
+    insert2=dbGetQuery(datasql$con,paste0("
+    INSERT INTO tbl_color
+    (color1, 
+    color2,user_id,
+    row_id)
+    VALUES ('#E6E6FA', '#B0171F',(SELECT MAX(row_id) from tbl_user),
+                                           (SELECT MAX(row_id)+1 from tbl_color C));")
+    )
+    
+    insert3=dbGetQuery(datasql$con,sprintf("
+    INSERT INTO tbl_logs
+    (logs, 
+    timestamp,user_id,
+    row_id)
+    VALUES ('Creación Usuario','%s',(SELECT MAX(row_id) from tbl_user),
+                                           (SELECT MAX(row_id)+1 from tbl_logs C));",
+                                           as.numeric(Sys.time()))
+    )
+    
+    
+    
+    
     shinyjs::reset("entry_form_user")
     removeModal()
     shinyalert(paste0("¡Bienvenido ",input$name, "!" ),
                paste0("Gracias por usar la presente app"),
                type = 'success')
+    
+    session$reload()
     
     }
     

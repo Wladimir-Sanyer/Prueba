@@ -1,7 +1,12 @@
 
 box::use(
-  shiny[...],   qs[qread],argonR[argonCard],shinyalert[shinyalert],
-  DT[dataTableOutput],shinycssloaders[withSpinner]
+  shiny[...], 
+  qs[qread],
+  argonR[argonCard],
+  shinyalert[shinyalert],
+  DT[dataTableOutput],
+  shinycssloaders[withSpinner],
+  data.table[data.table]
 )
 
 
@@ -14,15 +19,22 @@ return(color_cod)
 }
 #' @export
 select_color<-function(id,label,num){
-column(4,selectInput(id, 
-            label=label,
-            choices =color_sel(),selected=color_sel()[num]),style='margin-right: 15px;')
+column(4,
+       selectInput(
+       id, 
+       label=label,
+       choices =color_sel(),
+       selected=color_sel()[num]),
+       style='margin-right: 15px;')
 }
 
 #' @export
 action_button<-function(id,label,icon,style='color: #fff; background-color: #022461; border-color: #022461,margin-right: 50px;'){
-  actionButton(id,label=label ,icon = icon(icon),
-               style=style)
+  actionButton(id,
+               label=label ,
+               icon = icon(icon),
+               style=style
+               )
 }
 
 
@@ -49,8 +61,14 @@ button_table_two<-function(id,icon,id2,icon2){
 #' @export
 DT_table<-function(title,id){
   div(
-    argonCard(title = HTML(paste0('<i> <b>',title,'</b></i>')),width=12,withSpinner(type = 6, color = "#244880", 
-                                                                                    DT::dataTableOutput(id))),
+    argonCard(title = HTML(paste0('<i> <b>',title,'</b></i>')),
+              width=12,
+              withSpinner(
+                type = 6,
+                color = "#244880", 
+                DT::dataTableOutput(id)
+                )
+              ),
     style = "overflow-y: auto;overflow-x: auto;height:100%;width:100%")
 }
 
@@ -76,4 +94,38 @@ alert_register<-function(){
 shinyalert("¡Por favor!",
            paste0("Registrece como usuario para continuar"),
            type = 'error')
+}
+
+
+#' @export
+alert_register_two<-function(){
+  shinyalert("¡Por favor!",
+             paste0("Registrece como usuario para continuar y llene todos los campos requeridos"),
+             type = 'error')
+}
+
+#' @export
+question_buttom<-function(id,msg){
+
+  tags$head(tags$script(HTML(paste0('$(document).ready(function(){
+                      $("#',id,'")
+                      .popover({html: true,
+                      title: " ",
+                      content: `',msg,'`,
+                      trigger: "hover",delay: {show: 1, hide: 1}
+                      });
+                      });
+                      ' ))))
+}
+
+#' @export
+actt_bottom_prev<-function(id,icon='question',top,left=86,statu='info'){
+  
+  div(
+    style=paste0("display:inline-block; vertical-align: middle;position: absolute;margin: auto;width: 5%;left: ",left,"%;top:",top,"%;"),
+    actionButton(id,status = statu,
+                 label='',
+                 icon=icon(icon,lib='font-awesome'),
+                 size='xs')
+  )
 }

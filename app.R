@@ -1,9 +1,14 @@
 rm(list = ls(box:::loaded_mods), envir = box:::loaded_mods)
 box::use(
-  shiny[...],  bslib[bs_theme],  qs[qread],
+  shiny[...], 
+  bslib[bs_theme],  
+  qs[qread],
   ./components/utils,  
-  ./components/principal,  ./components/user, ./components/register,
-  ./components/relation_table
+  ./components/principal,  
+  ./components/user, 
+  ./components/register,
+  ./components/relation_table,
+  ./components/higcharts
 )
 options(shiny.maxRequestSize = 1024*1024^2)
 light=bs_theme()
@@ -24,6 +29,9 @@ ui <-fluidPage(id='fluidpage',
         tabPanel('Relación tablas', 
                  relation_table$relation_tableUI("relation")
         ),
+        tabPanel('Highcharts', 
+                 higcharts$highchartUI("highcharter")
+        )
           )
 )
 server <- function(input, output, session) {
@@ -32,8 +40,9 @@ server <- function(input, output, session) {
   
   user=callModule(user$userServ,"user")
   color=callModule(principal$HomeServ,"fresh",user)
-  callModule(register$registroServ,"register",user)
-  callModule(relation_table$relation_tableServ,"relation")
+  push=callModule(register$registroServ,"register",user)
+  relation=callModule(relation_table$relation_tableServ,"relation",push,user)
+  callModule(higcharts$highchartServ,"highcharter")
   
   
   

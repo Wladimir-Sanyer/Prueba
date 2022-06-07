@@ -1,7 +1,15 @@
 box::use(
-  shiny[...],  ./utils, ./datasql, 
-  ./forms,gargoyle[init,trigger,watch,on],DBI[dbGetQuery],shinyalert[shinyalert],
-  shinyjs[reset,toggleState],DT[...],data.table[data.table]
+  shiny[...], 
+  ./utils,
+  ./datasql, 
+  ./forms,
+  gargoyle[init,trigger,watch,on],
+  DBI[dbGetQuery],
+  shinyalert[shinyalert],
+  shinyjs[reset,toggleState],
+  DT[...],
+  data.table[data.table],
+  R6[R6Class]
 )
 
 
@@ -26,12 +34,14 @@ registroUI<-function(id,label='register'){
     br(),br(),br(),
 
     fluidRow(
-      utils$DT_table('Data Personal',ns('table_personal'))),
+      utils$DT_table('Data Personal',
+                     ns('table_personal'))),
     
     br(),br(),br(),
     
     fluidRow(
-      utils$DT_table('Data Jobs',ns('table_job')))
+      utils$DT_table('Data Jobs',
+                     ns('table_job')))
     
   )
   
@@ -42,7 +52,7 @@ registroUI<-function(id,label='register'){
 registroServ<-function(input,output,session,user){
   
   ns<-session$ns
-  init('form','outputform','delete','output_delete','personal_edit','outputpersonal_edit') #reactive data personal)
+  init('personal','outputpersonal','form','outputform','delete','output_delete','personal_edit','outputpersonal_edit') #reactive data personal)
   z <- new.env()
   
   # PERSONAL #######
@@ -56,7 +66,7 @@ registroServ<-function(input,output,session,user){
     if (length(z$user_id_$row_id)==0){
       utils$alert_register()
     }else{
-      
+    
     forms$form_personal(session,"Nuevo Personal",ns("submit_button"), "Guardar")
       
     trigger('form')
@@ -66,6 +76,8 @@ registroServ<-function(input,output,session,user){
 
 
   on("form", {
+    
+
     # Triggering the flag
     trigger("outputform")
   })
@@ -95,6 +107,16 @@ registroServ<-function(input,output,session,user){
                                   z$user_id_$row_id)
                       )
     
+    
+    insert3=dbGetQuery(datasql$con,sprintf("
+    INSERT INTO tbl_logs
+    (logs, 
+    timestamp,user_id,
+    row_id)
+    VALUES ('Ingreso Personal','%s',%s,(SELECT MAX(row_id)+1 from tbl_logs C));",
+                                           as.numeric(Sys.time()),z$user_id_$row_id)
+    )
+    
         shinyjs::reset("entry_form_personal")
         removeModal()
         shinyalert("¡Felicitaciones!",
@@ -105,20 +127,43 @@ registroServ<-function(input,output,session,user){
 
   })
 
-  
-  output$table_personal<-renderDataTable({
+  observe({
+    user$id_user
+    user$search
     input$yes_button_personal
     input$submit_button
     input$submit_edit_button
-    user$search
+    input$yes_button_job
+    input$submit_edit_button_job
+    input$submit_button_job
+    if(user$id_user ==''){}else{
+    z$user_id_=dbGetQuery(datasql$con,sprintf("select row_id from tbl_user where TRIM(id)= TRIM('%s')",user$id_user))
+    zi$personal=datasql$tbl_sel('tbl_job', z$user_id_$row_id)
+    z$personal=datasql$tbl_sel('tbl_personal', z$user_id_$row_id)
     
-    if(user$id_user==''){
-      validate(
-        need(!is.null(user$user_id),HTML('Porfavor, Registrece para cargar su data. Luego continue ingresando data para que cargue su historial'))
-      )
-
-    }else{
+    }
+  })
   
+
+  
+  output$table_personal<-renderDataTable({
+
+    user$id_user
+    user$search
+
+
+
+    if(user$id_user=='' | is.null(z$personal) ){
+      validate(
+        need(!is.null(user$user_id) | !is.null(z$personal),HTML('Porfavor, Registrece para cargar su data. Luego continue ingresando data para que cargue su historial'))
+      )
+      
+    }else{
+      watch("personal")
+      
+      z$personal$profile=utils$button_table_two(id=ns('edit_butt_personal'),icon='fa fa-pencil',id2=ns('delete_button_personal'),icon2='fa-minus')
+      z$personal_list=list(users=data.table(z$personal),user_df= z$personal)
+ 
       data_limp=z$personal_list$users[,.('Id'=id,'Name'=name,'Second Name'=second_name,Age=age,Adress=adress,
                                      Email=email,profile)]
     datatable(data_limp, filter = 'top',selection = 'single',style = "bootstrap4",escape = FALSE, plugins = "ellipsis",
@@ -164,16 +209,19 @@ registroServ<-function(input,output,session,user){
   observeEvent(input$yes_button_personal, priority = 20,{
 
     delete=dbGetQuery(datasql$con,sprintf('delete from tbl_personal where row_id = %s',z$row_id))
-    
+    insert3=dbGetQuery(datasql$con,sprintf("
+    INSERT INTO tbl_logs
+    (logs, 
+    timestamp,user_id,
+    row_id)
+    VALUES ('Eliminación Usuario','%s',%s,(SELECT MAX(row_id)+1 from tbl_logs C));",
+                                           as.numeric(Sys.time()),z$user_id_$row_id)
+    )
     removeModal()
   })
   
-  init('personal','outputpersonal') #reactive data personal)
-  observeEvent(input$yes_button_personal | input$submit_button | input$submit_edit_button | input$update,{
-    
-    z$personal=datasql$tbl_sel('tbl_personal', z$user_id_$row_id)
-    z$personal$profile=utils$button_table_two(id=ns('edit_butt_personal'),icon='fa fa-pencil',id2=ns('delete_button_personal'),icon2='fa-minus')
-    z$personal_list=list(users=data.table(z$personal),user_df= z$personal)
+  observeEvent(input$yes_button_personal | input$submit_button | input$submit_edit_button,{
+
     trigger('personal')
   })
   
@@ -221,6 +269,15 @@ registroServ<-function(input,output,session,user){
     up_post_act= dbGetQuery(datasql$con,sprintf("UPDATE tbl_personal set id= '%s',name ='%s',second_name='%s',age=%s,email='%s',adress='%s'
                                     where row_id= %s",input$id,input$name,input$second_name,input$age,
                                                         input$email,input$adress,row_selection))
+    insert3=dbGetQuery(datasql$con,sprintf("
+    INSERT INTO tbl_logs
+    (logs, 
+    timestamp,user_id,
+    row_id)
+    VALUES ('Actualización Usuario','%s',%s,(SELECT MAX(row_id)+1 from tbl_logs C));",
+                                           as.numeric(Sys.time()),z$user_id_$row_id)
+    )
+    
     shinyjs::reset("entry_form_personal")
     removeModal()
     
@@ -258,12 +315,11 @@ registroServ<-function(input,output,session,user){
   
   # JOBS ########
   
-  init('form1','outputform1','delete1','output_delete1','personal_edit1','outputpersonal_edit1') #reactive data personal)
+  init('personal1','outputpersonal1','form1','outputform1','delete1','output_delete1','personal_edit1','outputpersonal_edit1') #reactive data personal)
   ##Reactive Form Nuevo Job#####
   # Entrar al agregar form para Nuevo Usuario #
   observeEvent(input$job,{
-    z$user_id_=dbGetQuery(datasql$con,sprintf("select row_id from tbl_user where TRIM(id)= TRIM('%s')",user$id_user))
-    
+
     if (length(z$user_id_$row_id)==0){
       utils$alert_register()
     }else{
@@ -285,7 +341,7 @@ registroServ<-function(input,output,session,user){
     }else{
     insert=dbGetQuery(datasql$con,sprintf("
     INSERT INTO tbl_job 
-    (name, 
+    (job, 
     description,
     user_id,
     row_id)
@@ -294,7 +350,14 @@ registroServ<-function(input,output,session,user){
                                           ,input$description,
                                           z$user_id_$row_id)
     )
-    
+    insert3=dbGetQuery(datasql$con,sprintf("
+    INSERT INTO tbl_logs
+    (logs, 
+    timestamp,user_id,
+    row_id)
+    VALUES ('Creación Job','%s',%s,(SELECT MAX(row_id)+1 from tbl_logs C));",
+                                           as.numeric(Sys.time()),z$user_id_$row_id)
+    )
     shinyjs::reset("entry_form_job")
     removeModal()
     shinyalert("¡Felicitaciones!",
@@ -306,11 +369,19 @@ registroServ<-function(input,output,session,user){
   })
 
 output$table_job<-renderDataTable({
-  input$yes_button_job
-  input$submit_button_job
-  input$submit_edit_button_job
   user$search
-  data_limp=zi$personal_list$users[,.(Name=name,Description=description,profile)]
+  watch("personal1")
+
+  if(user$id_user=='' | is.null(zi$personal)){
+    validate(
+      need(!is.null(user$user_id) | !is.null(zi$personal) ,HTML('Porfavor, Registrece para cargar su data. Luego continue ingresando data para que cargue su historial'))
+    )
+    
+  }else{
+
+    zi$personal$profile=utils$button_table_two(id=ns('edit_butt_job'),icon='fa fa-pencil',id2=ns('delete_button_job'),icon2='fa-minus')
+    zi$personal_list=list(users=data.table(zi$personal),user_df= zi$personal)
+  data_limp=zi$personal_list$users[,.(Name=job,Description=description,profile)]
   datatable(data_limp, filter = 'top',selection = 'single',style = "bootstrap4",escape = FALSE, plugins = "ellipsis",
             # caption = htmltools::tags$caption( style = 'caption-side: top;text-align: center; color:blue; font-size:100% ;','Data Suelos Irrismart'),
             rownames = F,  extensions = c('Scroller','Buttons'),
@@ -323,7 +394,7 @@ output$table_job<-renderDataTable({
                    "function(settings, json) {",
                    "$(this.api().table().header()).css({'background-color': '#fff', 'color': '#1e3a7b'});",
                    "}")))
-
+}
   })
 
 
@@ -352,16 +423,20 @@ on("delete1", {
 observeEvent(input$yes_button_job, priority = 20,{
   
   delete=dbGetQuery(datasql$con,sprintf('delete from tbl_job where row_id = %s',zi$row_id))
-  
+  insert3=dbGetQuery(datasql$con,sprintf("
+    INSERT INTO tbl_logs
+    (logs, 
+    timestamp,user_id,
+    row_id)
+    VALUES ('Eliminación Job','%s',%s,(SELECT MAX(row_id)+1 from tbl_logs C));",
+                                         as.numeric(Sys.time()),z$user_id_$row_id)
+  )
   removeModal()
 })
 
-init('personal1','outputpersonal1') #reactive data personal)
 observeEvent(input$yes_button_job | input$submit_button_job | input$submit_edit_button_job ,{
   
-  zi$personal=datasql$tbl_sel('tbl_job', z$user_id_$row_id)
-  zi$personal$profile=utils$button_table_two(id=ns('edit_butt_job'),icon='fa fa-pencil',id2=ns('delete_button_job'),icon2='fa-minus')
-  zi$personal_list=list(users=data.table(zi$personal),user_df= zi$personal)
+
   trigger('personal1')
 })
 
@@ -381,7 +456,7 @@ observeEvent(input$edit_butt_job,{
   forms$form_job(session,"Editar Usuario",ns("submit_edit_button_job"), "Guardar")
   SQL_df_2=zi$personal_list$user_df
   updateTextAreaInput(session, "description", value = SQL_df_2[input$table_job_row_last_clicked, 'description'])
-  updateTextInput(session, "name", value = SQL_df_2[input$table_job_row_last_clicked, 'name'])
+  updateTextInput(session, "name", value = SQL_df_2[input$table_job_row_last_clicked, 'job'])
   
   trigger('personal_edit1')
 })
@@ -397,11 +472,21 @@ observeEvent(input$submit_edit_button_job, priority = 20,{
   SQL_df =zi$personal_list$users
   row_selection <- SQL_df[input$table_job_row_last_clicked, "row_id"]
   
-  up_post_act= dbGetQuery(datasql$con,sprintf("UPDATE tbl_job set name ='%s',description='%s'
+  up_post_act= dbGetQuery(datasql$con,sprintf("UPDATE tbl_job set job ='%s',description='%s'
                                     where row_id= %s",input$name,input$description,row_selection))
+  browser()
+  insert3=dbGetQuery(datasql$con,sprintf("
+    INSERT INTO tbl_logs
+    (logs, 
+    timestamp,user_id,
+    row_id)
+    VALUES ('Actualización Job',%s,%s,(SELECT MAX(row_id)+1 from tbl_logs C));",
+                                         as.numeric(Sys.time()),z$user_id_$row_id)
+  )
   shinyjs::reset("entry_form_job")
   removeModal()
   
 })
+return(input)
 
 }

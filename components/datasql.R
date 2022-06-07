@@ -20,3 +20,9 @@ tbl_sel<-function(tbl,user_id){
   }
   return(tbl_sel)
 }
+
+#' @export
+tbl_sel_all<-function(tbl){
+    tbl_sel=dbGetQuery(con,paste0('Select * from ',tbl))
+  return(tbl_sel)
+}

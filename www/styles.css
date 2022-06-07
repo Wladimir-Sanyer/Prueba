@@ -1,0 +1,160 @@
+h4 {
+  font-family: 'Lobster', cursive;
+  font-style:italic;
+  font-weight: 400;
+  line-height: 0.8;
+  color: #434a42;
+}
+#register-table_personal{
+  /*padding-left: 100px;
+  padding-right: 100px;*/
+  zoom: 90%;
+}
+#register-table_job{
+  /*padding-left: 100px;
+  padding-right: 100px;*/
+  zoom: 90%;
+}
+h2 {
+  font-family: 'Lobster', cursive;
+  font-style:italic;
+  font-weight: 500;
+  line-height: 0.8;
+  color: #434a42;
+}
+
+.search-input{
+  float: left;
+	position:relative;
+	align:center;
+}
+
+
+.mandatory_star { color: red; }
+
+.dataTables_filter {
+	visibility: hidden;
+}
+/*.download-container{
+  text-align: right;
+  padding-right: 100px;
+  padding-top: 100px;
+
+  position:relative;
+  z-index:20;
+}
+.download-container{
+  text-align: left;
+  padding-left: 100px;
+  margin-bottom: -20px;
+  position:relative;
+  z-index:20;
+}*/
+
+}
+#registro-table_personal,#registro-table_job{
+  padding-left: 90px;
+  padding-right: 90px;
+}
+
+#submit{
+  background-color: #00bc8c;
+  border-color: #00bc8c
+}
+
+
+
+.control-label{
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+/* Download Button */
+
+
+
+#errorMessage{
+  color: red;
+  font-weight: bold;
+  height: 10px;
+  margin-top: -10px;
+  margin-bottom: 15px;
+}
+
+
+/* Buttons */
+
+
+#register-edit_butt_personal{
+  color: #151e3d;
+}
+
+#register-edit_butt_personal:hover{
+  color: #5c7ff7;
+}
+
+#register-edit_butt_job{
+  color: #151e3d;
+}
+
+#register-edit_butt_job:hover{
+  color: #5c7ff7;
+}
+
+
+#registro_general-send_email{
+  color: #335e23 /* #dc3545; */
+}
+#registro_general-send_email:hover{
+  color: #70e645;/* red; */
+}
+#register-delete_button_personal,#register-delete_button_job{
+  color: #dc3545;
+}
+#register-delete_button_personal:hover{
+  color: red;
+}
+#register-delete_button_job:hover{
+  color: red;
+}
+
+
+.fa.fa-plus{
+  margin-bottom: 10px;
+}
+
+.dataTables_filter {
+visibility: hidden;
+}
+
+
+
+#yes_button{
+ margin-right: 10px;
+}
+
+
+
+.fas.fa-download.fa-2x{
+    color: #1684de;
+}
+
+.fas.fa-download.fa-2x:hover{
+    color: #1e6096
+}
+
+
+/.dataTables_wrapper .dt-buttons{float:right; }/
+
+
+.footer-date, .footer-title{
+color: #fff;
+}
+
+.footer-title{
+color: #353633;
+text-align: center;
+}
+
+
+.shiny-output-error { visibility: hidden; }",".shiny-output-error:before { visibility: hidden; }
