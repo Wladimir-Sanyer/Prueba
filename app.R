@@ -1,8 +1,7 @@
 rm(list = ls(box:::loaded_mods), envir = box:::loaded_mods)
 box::use(
   shiny[...], 
-  bslib[bs_theme],  
-  qs[qread],
+  bslib[bs_theme],
   ./components/utils,  
   ./components/principal,  
   ./components/user, 
@@ -48,7 +47,7 @@ server <- function(input, output, session) {
   
   observe(session$setCurrentTheme(
     
-    dark <- bs_theme(bg = color$color_background, fg =color$color_font, primary = "purple")
+   bs_theme(bg = color$color_background, fg =color$color_font, primary = "purple")
     
   ))
 

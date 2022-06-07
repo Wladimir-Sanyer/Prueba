@@ -6,7 +6,7 @@ box::use(
   ./datasql
 )
 
-
+#' @description UI del Panel Higcharter   
 #' @export
 highchartUI<-function(id,label='highcharter'){
   ns<-NS(id)
@@ -17,10 +17,11 @@ highchartUI<-function(id,label='highcharter'){
   
 }
 
+#' @description Server del Panel Higcharter   
 #' @export
 highchartServ<-function(input,output,session){
   
-  
+  #' @description Output Higcharter
   output$high<-renderHighchart({
     iris=datasql$tbl_sel_all('iris')
     

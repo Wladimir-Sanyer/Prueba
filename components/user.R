@@ -5,11 +5,12 @@ box::use(
   gargoyle[init,trigger,watch,on],
   ./utils,
   DBI[dbGetQuery],
-  ./datasql,shinyalert[shinyalert]
+  ./datasql,
+  shinyalert[shinyalert]
   
 )
-#jsResetCode <- "shinyjs.reset = function() {history.go(0)}" 
 
+#' @description UI Modulo User
 #' @export
 #' Se utilizara este modulo que reemplaza el shinyproxyname para saber que usuario esta
 #' ingresado en la base de datos y poder recuperar sus avances previos
@@ -31,7 +32,8 @@ userUI<-function(id,label='user'){
         label='Crear Usuario',
         icon='user'
       )
-    ),br(),
+    ),
+    br(),
   fluidRow(
     column(6,
       textInput(ns('id_user'),
@@ -41,7 +43,7 @@ userUI<-function(id,label='user'){
     ),
     utils$actt_bottom_prev(id=ns('eq'),
                            top=33,
-                           left=30),
+                           left=25),
     utils$question_buttom(id=ns('eq'),
                           msg = 'Por favor registrece e ingrese un ID valido, ID pre-cargado 1234')
   ,column(6,
@@ -54,7 +56,7 @@ userUI<-function(id,label='user'){
   )
 }
 
-
+#' @description Server Modulo User
 #' @export
 userServ<-function(input,output,session){
   
@@ -62,15 +64,11 @@ userServ<-function(input,output,session){
   init('form','outputform') #reactive data personal)
   
   
-  # CREAR USUARIOS #######
-  
-  ##Reactive Form Nuevo Usuario#####
-  # Entrar al agregar form para Nuevo Usuario #
-  observeEvent(input$client,{
-
-    forms$form_user(session,"Cree su usuario",ns("submit_button"), "Guardar")
+# CREAR USUARIOS #######
+#' @description  Entrar al form para agregar Nuevo Usuario #
+observeEvent(input$client,{
+ forms$form_user(session,"Cree su usuario",ns("submit_button"), "Guardar")
     trigger('form')
-    
   })
   
   on("form", {
@@ -79,7 +77,7 @@ userServ<-function(input,output,session){
   })
   
   
-  
+  #' @description  Inserta en la base de datos el nuevo usuario, colores predeterminados,logs #
   observeEvent(input$submit_button, priority = 20,{
     exist=dbGetQuery(datasql$con,paste0("SELECT  CASE WHEN EXISTS (Select id FROM tbl_user where TRIM(id) =
                                TRIM('",input$id,"')) THEN 1 ELSE 0 END"))
@@ -134,6 +132,10 @@ userServ<-function(input,output,session){
     }
     
   })
+  
+  
+
+  #' @description Muestra el nombre del Usuario   
   y <- new.env()
   init('user','output_user')
   

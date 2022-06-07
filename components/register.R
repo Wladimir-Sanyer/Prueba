@@ -1,8 +1,8 @@
 box::use(
-  shiny[...], 
   ./utils,
   ./datasql, 
   ./forms,
+  shiny[...], 
   gargoyle[init,trigger,watch,on],
   DBI[dbGetQuery],
   shinyalert[shinyalert],
@@ -12,7 +12,7 @@ box::use(
   R6[R6Class]
 )
 
-
+#' @description UI del Panel Registro   
 #' @export
 registroUI<-function(id,label='register'){
   ns<-NS(id)
@@ -31,13 +31,17 @@ registroUI<-function(id,label='register'){
       icon='user'
     ),
     
-    br(),br(),br(),
+    br(),
+    br(),
+    br(),
 
     fluidRow(
       utils$DT_table('Data Personal',
                      ns('table_personal'))),
     
-    br(),br(),br(),
+    br(),
+    br(),
+    br(),
     
     fluidRow(
       utils$DT_table('Data Jobs',
@@ -47,7 +51,7 @@ registroUI<-function(id,label='register'){
   
 }
 
-
+#' @description Server del Panel Registro   
 #' @export
 registroServ<-function(input,output,session,user){
   
@@ -56,9 +60,8 @@ registroServ<-function(input,output,session,user){
   z <- new.env()
   
   # PERSONAL #######
-  
-  ##Reactive Form Nuevo Usuario#####
-  # Entrar al agregar form para Nuevo Usuario #
+  #' @description Abre el form de ingreso al Personal  
+    # Entrar al agregar form para Nuevo Personal #
   observeEvent(input$personal,{
     
     z$user_id_=dbGetQuery(datasql$con,sprintf("select row_id from tbl_user where TRIM(id)= TRIM('%s')",user$id_user))
@@ -82,7 +85,7 @@ registroServ<-function(input,output,session,user){
     trigger("outputform")
   })
 
- 
+  #' @description Inserta el nuevo personal  
 # Insert Data Personal ####
   observeEvent(input$submit_button, priority = 20,{
 
@@ -126,7 +129,8 @@ registroServ<-function(input,output,session,user){
     
 
   })
-
+  
+  #' @description Actualiza las tablas
   observe({
     user$id_user
     user$search
@@ -144,8 +148,8 @@ registroServ<-function(input,output,session,user){
     }
   })
   
-
-  
+  # Tabla Personal ####
+  #' @description Output tabla de Personal
   output$table_personal<-renderDataTable({
 
     user$id_user
@@ -166,29 +170,15 @@ registroServ<-function(input,output,session,user){
  
       data_limp=z$personal_list$users[,.('Id'=id,'Name'=name,'Second Name'=second_name,Age=age,Adress=adress,
                                      Email=email,profile)]
-    datatable(data_limp, filter = 'top',selection = 'single',style = "bootstrap4",escape = FALSE, plugins = "ellipsis",
-              # caption = htmltools::tags$caption( style = 'caption-side: top;text-align: center; color:blue; font-size:100% ;','Data Suelos Irrismart'),
-              rownames = F,  extensions = c('Scroller','Buttons'),
-              list(deferRender = F, dom = 'Bfrt',autoWidth = TRUE,
-                   columnDefs = list(list(className = 'dt-center',width = '220px', targets = "_all")),
-                   scrollY = 220, scroller = TRUE, scrollX = T,
-                   pageLength = 3,
-                   buttons =c('excel','csv','copy','print'),
-                   initComplete = JS(
-                     "function(settings, json) {",
-                     "$(this.api().table().header()).css({'background-color': '#fff', 'color': '#1e3a7b'});",
-                     "}")))
+      utils$datatable_output(data_limp)
+      
     
 }
     })
   
   
   # Delete Table Personal####
-  
-
-
-  
-
+  #' @description Modal para confirmar eliminar personal
   observeEvent(input$delete_button_personal, priority = 20,{
     
     utils$modalito(session,ns("yes_button_personal"),"¿Esta seguro que desea eliminar este dato?")
@@ -205,7 +195,7 @@ registroServ<-function(input,output,session,user){
   })
  
   
-  
+  #' @description Confirmar eliminación de personal
   observeEvent(input$yes_button_personal, priority = 20,{
 
     delete=dbGetQuery(datasql$con,sprintf('delete from tbl_personal where row_id = %s',z$row_id))
@@ -232,9 +222,8 @@ registroServ<-function(input,output,session,user){
   })
   
 
-  # Editar Usuarios ####
-  ##Reactive Form General Riego#####
-  # Entrar al form para Editar Usuario #
+  # Editar personal ####
+  #' @description Editar data del personal
   observeEvent(input$edit_butt_personal,{
     forms$form_personal(session,"Editar Usuario",ns("submit_edit_button"), "Guardar")
     SQL_df_2=z$personal_list$user_df
@@ -259,7 +248,7 @@ registroServ<-function(input,output,session,user){
 
   
 
-  
+  #' @description Actualizar en la base de datos la data del personal seleccionado
   ## Envio a actualizar ####
   observeEvent(input$submit_edit_button, priority = 20,{
     
@@ -316,8 +305,9 @@ registroServ<-function(input,output,session,user){
   # JOBS ########
   
   init('personal1','outputpersonal1','form1','outputform1','delete1','output_delete1','personal_edit1','outputpersonal_edit1') #reactive data personal)
-  ##Reactive Form Nuevo Job#####
-  # Entrar al agregar form para Nuevo Usuario #
+
+  #' @description Abre el form de ingreso al job  
+  # Entrar al agregar form para Nuevo job #
   observeEvent(input$job,{
 
     if (length(z$user_id_$row_id)==0){
@@ -332,6 +322,8 @@ registroServ<-function(input,output,session,user){
     # Triggering the flag
     trigger("outputform1")
   })
+  
+  #' @description Insertar nuevo job
   # Insert Data Job ####
   observeEvent(input$submit_button_job, priority = 20,{
     userr=dbGetQuery(datasql$con,sprintf("select row_id from tbl_user where TRIM(id)= TRIM('%s')",user$id_user))
@@ -368,6 +360,8 @@ registroServ<-function(input,output,session,user){
     
   })
 
+  # Tabla Job ####
+  #' @description Output tabla personal
 output$table_job<-renderDataTable({
   user$search
   watch("personal1")
@@ -382,18 +376,8 @@ output$table_job<-renderDataTable({
     zi$personal$profile=utils$button_table_two(id=ns('edit_butt_job'),icon='fa fa-pencil',id2=ns('delete_button_job'),icon2='fa-minus')
     zi$personal_list=list(users=data.table(zi$personal),user_df= zi$personal)
   data_limp=zi$personal_list$users[,.(Name=job,Description=description,profile)]
-  datatable(data_limp, filter = 'top',selection = 'single',style = "bootstrap4",escape = FALSE, plugins = "ellipsis",
-            # caption = htmltools::tags$caption( style = 'caption-side: top;text-align: center; color:blue; font-size:100% ;','Data Suelos Irrismart'),
-            rownames = F,  extensions = c('Scroller','Buttons'),
-            list(deferRender = F, dom = 'Bfrt',autoWidth = TRUE,
-                 columnDefs = list(list(className = 'dt-center',width = '220px', targets = "_all")),
-                 scrollY = 220, scroller = TRUE, scrollX = T,
-                 pageLength = 3,
-                 buttons =c('excel','csv','copy','print'),
-                 initComplete = JS(
-                   "function(settings, json) {",
-                   "$(this.api().table().header()).css({'background-color': '#fff', 'color': '#1e3a7b'});",
-                   "}")))
+  utils$datatable_output(data_limp)
+  
 }
   })
 
@@ -404,7 +388,7 @@ output$table_job<-renderDataTable({
 zi <- new.env()
 
 
-
+#' @description Abre el modulo para confirmar eliminar job
 observeEvent(input$delete_button_job, priority = 20,{
   
   utils$modalito(session,ns("yes_button_job"),"¿Esta seguro que desea eliminar este dato?")
@@ -420,6 +404,7 @@ on("delete1", {
   trigger("output_delete1")
 })
 
+#' @description Elimina el job seleccionado en la base de datos
 observeEvent(input$yes_button_job, priority = 20,{
   
   delete=dbGetQuery(datasql$con,sprintf('delete from tbl_job where row_id = %s',zi$row_id))
@@ -448,10 +433,9 @@ on("personal1", {
 
 
 
-
-# Editar Usuarios ####
-##Reactive Form General Riego#####
-# Entrar al form para Editar Usuario #
+#' @description Carga data seleccionada en el form job para actualizar
+# Editar Job ####
+# Entrar al form para Editar Job #
 observeEvent(input$edit_butt_job,{
   forms$form_job(session,"Editar Usuario",ns("submit_edit_button_job"), "Guardar")
   SQL_df_2=zi$personal_list$user_df
@@ -466,6 +450,7 @@ on("personal_edit1", {
   trigger("outputpersonal_edit1")
 })
 
+#' @description Actualizar data en la base de datos
 ## Envio a actualizar ####
 observeEvent(input$submit_edit_button_job, priority = 20,{
   
@@ -474,7 +459,6 @@ observeEvent(input$submit_edit_button_job, priority = 20,{
   
   up_post_act= dbGetQuery(datasql$con,sprintf("UPDATE tbl_job set job ='%s',description='%s'
                                     where row_id= %s",input$name,input$description,row_selection))
-  browser()
   insert3=dbGetQuery(datasql$con,sprintf("
     INSERT INTO tbl_logs
     (logs, 

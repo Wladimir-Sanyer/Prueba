@@ -4,19 +4,21 @@ box::use(
   qs[qread],
   argonR[argonCard],
   shinyalert[shinyalert],
-  DT[dataTableOutput],
+  DT[...],
   shinycssloaders[withSpinner],
   data.table[data.table]
 )
 
-
+#' @description Funcion para traer todos los colores a mostrar para background y font
 #' @export
 color_sel<-function(){
-x=qread('/home/wladimir/Escritorio/Wladimir/Proyecto_Ais/color.qs')
+x=qread('data/color.qs')
 color_cod=x$B
 names(color_cod)=toupper(x$A)
 return(color_cod)
 }
+
+#' @description Funcion para crear los selecinput de la seleccion de colores
 #' @export
 select_color<-function(id,label,num){
 column(4,
@@ -28,6 +30,7 @@ column(4,
        style='margin-right: 15px;')
 }
 
+#' @description Funcion para crear un action button personalmente estilizado
 #' @export
 action_button<-function(id,label,icon,style='color: #fff; background-color: #022461; border-color: #022461,margin-right: 50px;'){
   actionButton(id,
@@ -38,15 +41,9 @@ action_button<-function(id,label,icon,style='color: #fff; background-color: #022
 }
 
 
-# Button DT Table ####
-#' @export
-button_table<-function(id,icon){
-  paste0('<button id=','\"',id,'\"','type=\"button\" class=\"btn btn-link btn-sm\"
-          onclick=\"Shiny.onInputChange(&quot;',id,'&quot;,  Math.random())\"><i class=\"fas ',icon,' fa-2x\"></i></button>')
-  
-}
 
 # Two Button DT Table ####
+#' @description Botones para editar y eliminar en el Datatable
 #' @export
 button_table_two<-function(id,icon,id2,icon2){
   paste0('<button id=','\"',id,'\"','type=\"button\" class=\"btn btn-link btn-sm\"
@@ -57,7 +54,7 @@ button_table_two<-function(id,icon,id2,icon2){
 }
 
 
-
+#' @description Divsion para Box con DT
 #' @export
 DT_table<-function(title,id){
   div(
@@ -74,6 +71,7 @@ DT_table<-function(title,id){
 
 
 ## Modal para aceptar o negar una accion importante ####
+#' @description Modal para aceptar o negar una accion importante
 #' @export
 modalito<-function(session,aceptar,msj){
   ns<-session$ns
@@ -88,7 +86,7 @@ modalito<-function(session,aceptar,msj){
   
 }
 
-
+#' @description Alerta para que el usuario inicie sesion
 #' @export
 alert_register<-function(){
 shinyalert("¡Por favor!",
@@ -96,7 +94,7 @@ shinyalert("¡Por favor!",
            type = 'error')
 }
 
-
+#' @description Alerta para que el usuario llene todos los campos
 #' @export
 alert_register_two<-function(){
   shinyalert("¡Por favor!",
@@ -104,6 +102,7 @@ alert_register_two<-function(){
              type = 'error')
 }
 
+#' @description Mensaje de Popover
 #' @export
 question_buttom<-function(id,msg){
 
@@ -118,6 +117,7 @@ question_buttom<-function(id,msg){
                       ' ))))
 }
 
+#' @description Boton para el Popover
 #' @export
 actt_bottom_prev<-function(id,icon='question',top,left=86,statu='info'){
   
@@ -128,4 +128,22 @@ actt_bottom_prev<-function(id,icon='question',top,left=86,statu='info'){
                  icon=icon(icon,lib='font-awesome'),
                  size='xs')
   )
+}
+
+#' @description Datatable personalizado
+#' @export
+datatable_output<-function(data){
+  datatable(data, filter = 'top',selection = 'single',style = "bootstrap4",escape = FALSE, plugins = "ellipsis",
+            # caption = htmltools::tags$caption( style = 'caption-side: top;text-align: center; color:blue; font-size:100% ;','Data Suelos Irrismart'),
+            rownames = F,  extensions = c('Scroller','Buttons'),
+            list(deferRender = F, dom = 'Bfrt',autoWidth = TRUE,
+                 columnDefs = list(list(className = 'dt-center',width = '220px', targets = "_all")),
+                 scrollY = 220, scroller = TRUE, scrollX = T,
+                 pageLength = 3,
+                 buttons =c('excel','csv','copy','print'),
+                 initComplete = JS(
+                   "function(settings, json) {",
+                   "$(this.api().table().header()).css({'background-color': '#fff', 'color': '#1e3a7b'});",
+                   "}")))
+  
 }

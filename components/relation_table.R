@@ -1,18 +1,20 @@
 box::use(
   shiny[...],
-  ./datasql,R6[R6Class],
-  ./utils,DBI[dbGetQuery],
-  gargoyle[init,trigger,watch,on],DT[...]
+  gargoyle[init,trigger,watch,on],
+  DT[...],
+  R6[R6Class],
+  DBI[dbGetQuery],
+  ./utils,
+  ./datasql
 )
 names_tbls=c('tbl_personal','tbl_job')
+
+#' @description UI del Panel Relacional   
 #' @export
 relation_tableUI<-function(id,label='relation'){
 ns<-NS(id)
 
 tagList(
-  
-  
-  
   div(
     class = "container",
     tags$hr(),
@@ -109,7 +111,7 @@ tagList(
 
 }
 
-
+#' @description UI del Panel Relacional   
 #' @export
 relation_tableServ<-function(input,output,session,push,user){
   zoy <- new.env()
@@ -128,10 +130,8 @@ relation_tableServ<-function(input,output,session,push,user){
       selected = input$tabla_join1
     )
   }) 
-  # 
-  # %>%
-  #   bindEvent(watch("sync"))
-  
+
+  #' @description R6 para limpiar data a mostrar como opcion
   data_to_choice <- R6Class("data_to_choice",
                     public = list(
                       name = NULL,
@@ -153,7 +153,8 @@ relation_tableServ<-function(input,output,session,push,user){
                       }
                     )
   )
-  # 
+  
+  #' @description Actualizr columna derecha y columna izquierda para unir
   observe({
     req(input$tabla_join)
     req(input$tabla_join1)
@@ -199,7 +200,7 @@ relation_tableServ<-function(input,output,session,push,user){
   
 
   
-  
+  #' @description Nodo para relacionar Personal-Job
   observe({
     req(input$tabla_join1)
     req(input$tabla_join)
@@ -212,10 +213,8 @@ relation_tableServ<-function(input,output,session,push,user){
   })
   
   init('princ','second')
-  
+  #' @description Insertar data de la relacion
   observeEvent(input$relacionar,{
-   # zoy$y=dbGetQuery(datasql$con,sprintf("select row_id from tbl_user where TRIM(id)= TRIM('%s')",user$id_user))
-
     if(user$id_user=='' | length(zoy$y$row_id)==0 | is.null(input$cols_join)){
     
       utils$alert_register_two()
@@ -252,10 +251,8 @@ relation_tableServ<-function(input,output,session,push,user){
     }
   })
   
-  # on("princ", {
-  #   trigger("second")
-  # })
-  
+
+  #' @description Output de la tabla relacion
   output$table_relation<-renderDataTable({
     input$relacionar
    
@@ -266,19 +263,7 @@ relation_tableServ<-function(input,output,session,push,user){
       
     }else{
       watch('princ')
-      data_limp=zoy$v
-      datatable(data_limp, filter = 'top',selection = 'single',style = "bootstrap4",escape = FALSE, plugins = "ellipsis",
-                # caption = htmltools::tags$caption( style = 'caption-side: top;text-align: center; color:blue; font-size:100% ;','Data Suelos Irrismart'),
-                rownames = F,  extensions = c('Scroller','Buttons'),
-                list(deferRender = F, dom = 'Bfrt',autoWidth = TRUE,
-                     columnDefs = list(list(className = 'dt-center',width = '220px', targets = "_all")),
-                     scrollY = 220, scroller = TRUE, scrollX = T,
-                     pageLength = 3,
-                     buttons =c('excel','csv','copy','print'),
-                     initComplete = JS(
-                       "function(settings, json) {",
-                       "$(this.api().table().header()).css({'background-color': '#fff', 'color': '#1e3a7b'});",
-                       "}")))
+      utils$datatable_output(zoy$v)
       
       
       

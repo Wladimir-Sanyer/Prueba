@@ -28,7 +28,11 @@ h2 {
 	position:relative;
 	align:center;
 }
-
+h3 {font-family: 'Lobster', 
+cursive;font-style:italic; 
+text-align: center;
+font-weight: 500;line-height: 1.1;
+color: #434a42;}
 
 .mandatory_star { color: red; }
 

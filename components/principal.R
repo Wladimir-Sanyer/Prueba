@@ -1,22 +1,18 @@
 box::use(
   shiny[...], 
+  DBI[dbGetQuery],
+  DT[...],
   ./utils, 
   ./datasql,
-  DBI[dbGetQuery],
-  DT[...]
 )
 
 
-
+#' @description UI Modulo del Panel Home
 #' @export
 HomeUI<-function(id,label='fresh'){
   ns<-NS(id)
   tagList(
-    fluidRow(
-    tags$style("#fluidpage{margin-left:5%; margin-right:0%;},
-                        h3 {font-family: 'Lobster', cursive;font-style:italic;  text-align: center;font-weight: 500;line-height: 1.1;color: #434a42;}"),
-   
-    ),br(),
+    br(),
       fluidRow(utils$select_color(ns("color_background"), 
                                   label="Seleccione el color de fondo",458),
                utils$select_color(ns("color_font"), 
@@ -45,9 +41,12 @@ HomeUI<-function(id,label='fresh'){
     )
 }
 
+#' @description Server Modulo del Panel Home
 #' @export
 HomeServ<-function(input,output,session,user){
   z<- new.env()
+  
+  #' @description Tabla de Logs
   output$table_changes<-renderDataTable({
     user$search
     user$id_user
@@ -62,31 +61,19 @@ HomeServ<-function(input,output,session,user){
       z$personal_list=dbGetQuery(datasql$con,sprintf("select row_id from tbl_user where TRIM(id)= TRIM('%s')",user$id_user))
       z$personal_list_final=dbGetQuery(datasql$con,sprintf("select logs as Logs, datetime(timestamp,'unixepoch') as Timestamp from tbl_logs where user_id= %s",z$personal_list))
       
-      data_limp=z$personal_list_final
-      datatable(data_limp, filter = 'top',selection = 'single',style = "bootstrap4",escape = FALSE, plugins = "ellipsis",
-                # caption = htmltools::tags$caption( style = 'caption-side: top;text-align: center; color:blue; font-size:100% ;','Data Suelos Irrismart'),
-                rownames = F,  extensions = c('Scroller','Buttons'),
-                list(deferRender = F, dom = 'Bfrt',autoWidth = TRUE,
-                     columnDefs = list(list(className = 'dt-center',width = '220px', targets = "_all")),
-                     scrollY = 220, scroller = TRUE, scrollX = T,
-                     pageLength = 3,
-                     buttons =c('excel','csv','copy','print'),
-                     initComplete = JS(
-                       "function(settings, json) {",
-                       "$(this.api().table().header()).css({'background-color': '#fff', 'color': '#1e3a7b'});",
-                       "}")))
+      #data_limp=z$personal_list_final
+      utils$datatable_output(z$personal_list_final)
 
     }
   })
   
 
   
-  
+  #' @description Update background y font color
   observe({
 
     user$id_user
     input$save
-    
     z$us=dbGetQuery(datasql$con,sprintf("select row_id from tbl_user where TRIM(id)= TRIM('%s')",user$id_user))
 
     if(user$id_user=='' | length(z$us$row_id)==0){
@@ -126,6 +113,7 @@ HomeServ<-function(input,output,session,user){
 
   })
   
+  #' @description Insertar data y logs al guardar
   
   observeEvent(input$save,{
     
