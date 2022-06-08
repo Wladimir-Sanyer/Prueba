@@ -19,6 +19,9 @@ return(color_cod)
 }
 
 #' @description Funcion para crear los selecinput de la seleccion de colores
+#' @param id es el id del selectinput
+#' @param label es el etiqueta que tendra dicho selectinput
+#' @param num es el numero del color con el iniciara la aplicacion por default
 #' @export
 select_color<-function(id,label,num){
 column(4,
@@ -31,6 +34,10 @@ column(4,
 }
 
 #' @description Funcion para crear un action button personalmente estilizado
+#' @param id es el id del actionbutton
+#' @param label es el etiqueta que tendra dicho actionbutton
+#' @param icon es el icono que tendra dicho actionbutton
+#' @param style es el estilo que tendra dicho actionbutton
 #' @export
 action_button<-function(id,label,icon,style='color: #fff; background-color: #022461; border-color: #022461,margin-right: 50px;'){
   actionButton(id,
@@ -44,6 +51,10 @@ action_button<-function(id,label,icon,style='color: #fff; background-color: #022
 
 # Two Button DT Table ####
 #' @description Botones para editar y eliminar en el Datatable
+#' @param id es el id del primer button de la tabla
+#' @param icon es el icono del primer button de la tabla
+#' @param id2 es el id del segundo button de la tabla
+#' @param icon2 es el icono del segundo button de la tabla
 #' @export
 button_table_two<-function(id,icon,id2,icon2){
   paste0('<button id=','\"',id,'\"','type=\"button\" class=\"btn btn-link btn-sm\"
@@ -55,6 +66,8 @@ button_table_two<-function(id,icon,id2,icon2){
 
 
 #' @description Divsion para Box con DT
+#' @param title titlo del argon card (box card) 
+#' @param es el id del datatable
 #' @export
 DT_table<-function(title,id){
   div(
@@ -72,6 +85,9 @@ DT_table<-function(title,id){
 
 ## Modal para aceptar o negar una accion importante ####
 #' @description Modal para aceptar o negar una accion importante
+#' @param session la session en la que se encuentra
+#' @param aceptar el button de aceptar el proceso
+#' @param msj el mensaje a mostrar
 #' @export
 modalito<-function(session,aceptar,msj){
   ns<-session$ns
@@ -103,6 +119,8 @@ alert_register_two<-function(){
 }
 
 #' @description Mensaje de Popover
+#' @param id es el id del Popover
+#' @param msg es el mensaje que muestra el popover
 #' @export
 question_buttom<-function(id,msg){
 
@@ -118,6 +136,11 @@ question_buttom<-function(id,msg){
 }
 
 #' @description Boton para el Popover
+#' @param id es el id del acttion button del popover
+#' @param icon es el icono del action button del popover
+#' @param top es el la posicion top en la que estara
+#' @param left es la posicion left en la que se encontrara el button popover
+#' @param statu es el status del button (por default info)
 #' @export
 actt_bottom_prev<-function(id,icon='question',top,left=86,statu='info'){
   
@@ -131,6 +154,7 @@ actt_bottom_prev<-function(id,icon='question',top,left=86,statu='info'){
 }
 
 #' @description Datatable personalizado
+#' @param data es la data a output en el datatable
 #' @export
 datatable_output<-function(data){
   datatable(data, filter = 'top',selection = 'single',style = "bootstrap4",escape = FALSE, plugins = "ellipsis",
